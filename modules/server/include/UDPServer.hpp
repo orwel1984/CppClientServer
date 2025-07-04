@@ -18,7 +18,7 @@ public:
     {
         m_packetHandler = (handler)
                               ? std::move(handler)
-                              : std::bind(&UDPServer::process_packet, this, std::placeholders::_1,std::placeholders::_2, std::placeholders::_3);
+                              : std::bind(&UDPServer::processPacket, this, std::placeholders::_1,std::placeholders::_2, std::placeholders::_3);
     }
 
     ~UDPServer() override { shutdown(); }
@@ -27,9 +27,9 @@ public:
     void shutdown() override;
 
 protected:
-    void receive_packet();
-    void on_packet_received(const boost::system::error_code &ec, std::size_t bytes_recvd);
-    void process_packet(const std::error_code &ec, std::size_t len, std::string_view buffer);
+    void receivePacket();
+    void onPacketReceived(const boost::system::error_code &ec, std::size_t bytes_recvd);
+    void processPacket(const std::error_code &ec, std::size_t len, std::string_view buffer);
 
 public: 
     void setPacketHandler(PacketHandler handler){ m_packetHandler = handler; }

@@ -15,17 +15,17 @@ void UDPServer::start()
     m_running = true;
 
     std::cout << "\nUDPServer started on port " << m_port << std::endl;
-    receive_packet();
+    receivePacket();
 }
 
-void UDPServer::receive_packet()
+void UDPServer::receivePacket()
 {
     m_socket.async_receive_from(boost::asio::buffer(m_recv_buffer), m_remote_endpoint,
                                 [this](boost::system::error_code ec, std::size_t bytes_transferred)
-                                { on_packet_received(ec, bytes_transferred); });
+                                { onPacketReceived(ec, bytes_transferred); });
 }
 
-void UDPServer::on_packet_received(const boost::system::error_code& error, std::size_t bytes_recvd)
+void UDPServer::onPacketReceived(const boost::system::error_code& error, std::size_t bytes_recvd)
 {
     if (!error)
     {
@@ -33,7 +33,7 @@ void UDPServer::on_packet_received(const boost::system::error_code& error, std::
 
         if (m_running)
         {        
-            receive_packet(); //recursive async chain
+            receivePacket(); //recursive async chain
         }
     }
     else
@@ -43,7 +43,7 @@ void UDPServer::on_packet_received(const boost::system::error_code& error, std::
     }
 }
 
-void UDPServer::process_packet(const std::error_code& ec, std::size_t len, std::string_view packet)
+void UDPServer::processPacket(const std::error_code& ec, std::size_t len, std::string_view packet)
 {
     std::cout << "\n\nReceived packet of size: " << len << std::endl;
     std::cout << "\nPacket data: \n" << packet << std::endl;

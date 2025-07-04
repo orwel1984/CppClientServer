@@ -1,3 +1,5 @@
+# Boost Configuration Helper for CMake
+# This file provides functions to configure boost
 
 function(configure_boost version components)
     string(REPLACE "." "_" BoostDir "${version}")
@@ -25,6 +27,13 @@ function(configure_boost version components)
     set(Boost_LIBRARY_DIRS "${Boost_LIBRARY_DIRS}" PARENT_SCOPE)
     set(Boost_INCLUDE_DIRS "${Boost_INCLUDE_DIRS}" PARENT_SCOPE)
 
+endfunction()
+
+function(print_boost_libraries BOOST_LIBS)
+    message(STATUS "Boost static libraries:")
+    foreach(lib ${BOOST_LIBS})
+        message(STATUS "  ✓ ${lib}")
+    endforeach()
 endfunction()
 
 function(find_missing_components COMPONENTS OUT_VAR)

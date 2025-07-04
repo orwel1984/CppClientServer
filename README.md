@@ -274,10 +274,19 @@ When a larger Video Data Unit is received it is fragmented into smaller 1024 siz
 
 ## Design
 
-Due to lack of time, I am unable to add the complete relation, but here is a general overiew:
+### Abstractions
+
+#### Server 
+#### Client
+#### Packet
+
+#### UDP_Server
+#### UDP_Client
 
 <img src="images/uml_server.png" alt="UML Server" width="250"/>
 <img src="images/uml_clients.png" alt="UML Client" width="250"/>
+
+
 
 ## Tests
 
