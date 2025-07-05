@@ -1,4 +1,4 @@
-# Vay Sender/Receiver Test 
+# Sender/Receiver  App based on UDP
 
 ## Table of Contents
 
@@ -237,7 +237,10 @@ This is shown in the diagram below:
 Each data-unit is read and sent to the server every 10ms.
 <br>When the entire File is read, the client sends a last **3-byte** datagram with **"eof"**, indicating that end of file is reached.
 
-The Receiver end is configured to reveive the **Maximum Packet Size of 1024 bytes.**  This is also hardcoded on the Client end (i.e. the Sender). If a Data Frame Unit is larger than Max_Packet_Size, then that data-unit is fragmented into smaller packets of  1024. 
+The Receiver end is configured to receive a **Maximum Packet Size of 1024 bytes.**  
+If a Data Frame Unit is larger than Max_Packet_Size, then that data-unit is fragmented into smaller packets of  1024. 
+
+This is also hardcoded on the Client end (i.e. the Sender). 
 
 These fragmented packets are sent at a much smaller time-interval than 10ms ( about 3ms, this value should be adjusted based on network congestion).
 
