@@ -6,16 +6,39 @@
 using namespace boost::asio;
 using namespace boost::asio::ip;
 
-void UDPServer::start()
+namespace
+{
+    void Log(const std::string& message) { std::cout << message << std::endl; }
+
+    void Log(const std::error_code& error)
+    {
+        std::cout << "Error code: " << error.value() << std::endl;
+        std::cout << "Error message: " << error.message() << std::endl;
+    }
+
+    void Log(const std::string& message, const std::error_code& error)
+    {
+        Log(message);
+        Log(error);
+    }
+}
+
+std::error_code UDPServer::start()
 {
     ip::udp::endpoint endpoint(ip::udp::v4(), m_port);
 
-    m_socket.open(endpoint.protocol());
-    m_socket.bind(endpoint);
-    m_running = true;
+    boost::system::error_code ec;
+    m_socket.open(endpoint.protocol(), ec);
+    if (ec) { return ec; }
+        
+    m_socket.bind(endpoint, ec);
+    if (ec) { return ec; }
 
-    std::cout << "\nUDPServer started on port " << m_port << std::endl;
+    m_running = true;
     receivePacket();
+
+    Log("UDPServer started successfully on port " + std::to_string(m_port));
+    return {};  // success
 }
 
 void UDPServer::receivePacket()
@@ -27,48 +50,51 @@ void UDPServer::receivePacket()
 
 void UDPServer::onPacketReceived(const boost::system::error_code& error, std::size_t bytes_recvd)
 {
-    if (!error)
+    if(error)
     {
-        m_packetHandler(error, bytes_recvd, std::string_view(m_recv_buffer.data(), bytes_recvd));
-
-        if (m_running)
-        {        
-            receivePacket(); //recursive async chain
-        }
+        Log(error);
+        return;
     }
-    else
+
+    m_packetHandler(error, bytes_recvd, std::string_view(m_recv_buffer.data(), bytes_recvd));
+    if (m_running)
     {
-        std::cout << "Error code: " << error << std::endl;
-        std::cout << "Error message: " << error.message() << std::endl;
+        receivePacket();  // recursive async chain
     }
 }
 
 void UDPServer::processPacket(const std::error_code& ec, std::size_t len, std::string_view packet)
 {
-    std::cout << "\n\nReceived packet of size: " << len << std::endl;
-    std::cout << "\nPacket data: \n" << packet << std::endl;
+    Log("Received packet of size: " + std::to_string(len));
+    Log("Packet data: " + std::string(packet));
 }
 
-void UDPServer::stop()
+std::error_code UDPServer::stop()
 {
     if (m_running)
     {
         m_running = false;
-        boost::system::error_code ec;
-        auto result = m_socket.close(ec);
-        if (ec)
+        boost::system::error_code error;
+        auto result = m_socket.close(error);
+        if(error)
         {
-            std::cerr << "Error closing UDP socket: " << ec.message() << std::endl;
+            Log(error);
+            return error;
         }
-        std::cout << "\nUDPServer stopped." << std::endl;
     }
+    Log("UDPServer stopped successfully.");
+    return {};  // success
 }
 
-void UDPServer::shutdown()
+std::error_code UDPServer::shutdown()
 {
-    stop();
+    auto ec = stop();
+    if (ec)
+    {
+        Log("Error closing UDP socket", ec);
+        return ec;
+    }
 
-    // Add any additional cleanup here if needed
-
-    std::cout << "\nUDPServer shutdown complete." << std::endl;
+    Log("UDPServer shutdown complete.");
+    return {};  // success
 }

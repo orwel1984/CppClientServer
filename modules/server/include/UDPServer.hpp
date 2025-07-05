@@ -14,7 +14,7 @@ class UDPServer : public GenericServer
 {
 public:
     UDPServer(boost::asio::io_context &io_context, uint16_t port, PacketHandler handler = nullptr)
-        : GenericServer(io_context), m_port(port), m_socket(io_context), m_running(false)
+    : m_port(port), m_socket(io_context), m_running(false)
     {
         m_packetHandler = (handler)
                               ? std::move(handler)
@@ -22,9 +22,9 @@ public:
     }
 
     ~UDPServer() override { shutdown(); }
-    void start() override;
-    void stop() override;
-    void shutdown() override;
+    std::error_code start() override;
+    std::error_code stop() override;
+    std::error_code shutdown() override;
 
 protected:
     void receivePacket();

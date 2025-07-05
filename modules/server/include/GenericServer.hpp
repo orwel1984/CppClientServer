@@ -1,13 +1,13 @@
 #pragma once
 #include <boost/asio.hpp>
+#include <system_error>
 
-class GenericServer 
+class ServerImpl;
+class GenericServer
 {
 public:
-    GenericServer(boost::asio::io_context& io_context){};
+    virtual std::error_code start() = 0;
+    virtual std::error_code stop() = 0;
+    virtual std::error_code shutdown() = 0;
     virtual ~GenericServer() = default;
-
-    virtual void start() =0;
-    virtual void stop() =0;
-    virtual void shutdown() =0;
 };

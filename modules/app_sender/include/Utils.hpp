@@ -50,18 +50,18 @@ std::optional<boost::program_options::variables_map> parseCommandline(int argc, 
 }
 
 void sendFragmentedFrame(std::shared_ptr<VideoFileReader> fileReader,
-                             std::shared_ptr<UDPClient> client, const std::vector<std::byte>& chunk, const size_t MAX_PACKET_SIZE)
+                         std::shared_ptr<UDPClient> client, const std::vector<std::byte>& chunk,
+                         const size_t MAX_PACKET_SIZE)
 {
     for (size_t offset = 0; offset < chunk.size(); offset += MAX_PACKET_SIZE)
     {
         size_t fragmentSize = std::min(MAX_PACKET_SIZE, chunk.size() - offset);
         std::vector<std::byte> fragment(chunk.begin() + offset,
                                         chunk.begin() + offset + fragmentSize);
-        
+
         client->sendPacket(fragment);
 
-        std::this_thread::sleep_for(
-            std::chrono::milliseconds(3)); 
+        std::this_thread::sleep_for(std::chrono::milliseconds(3));
     }
 }
 
@@ -82,7 +82,7 @@ void sendVideoFrameEvery10ms(std::shared_ptr<VideoFileReader> fileReader,
             sendFragmentedFrame(fileReader, client, *chunk, MAX_PACKET_SIZE);
         }
         std::this_thread::sleep_for(std::chrono::milliseconds(10));  // 10ms between frames
-    }    
+    }
 
     std::cout << "All frames sent." << std::endl;
     std::vector<std::byte> eofPacket = {std::byte('e'), std::byte('o'), std::byte('f')};

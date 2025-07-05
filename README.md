@@ -11,7 +11,11 @@
   - [Sender App](#sender-app)
 - [Protocol](#protocol)
 - [Timestamps File](#timestamps-file)
-- [Design](#timestamps-file)
+- [Design Philosophy](#design-philosophy)
+  - [Abstractions](#abstractions)
+    - [Server](#server)
+    - [Client](#client)
+- [Tests](#tests)
 
 ## Dependencies
 
@@ -223,13 +227,17 @@ This is shown in the diagram below:
 | Header     |      (variable length)      |
 +------------+-----------------------------+
 
++------------+
+| 3-byte     |
+| EOF        |
++------------+
+
  ```
 
 Each data-unit is read and sent to the server every 10ms.
+<br>When the entire File is read, the client sends a last **3-byte** datagram with **"eof"**, indicating that end of file is reached.
 
-When the entire File is read, the client sends a last **3-byte** datagram with **"eof"**, indicating that end of file is reached.
-
-The Receiver end is configured to reveive the Maximum Packet Size of 1024 bytes.  This is also hardcoded on the Client end (i.e. the Sender). If a Data Frame Unit is larger than Max_Packet_Size, then that data-unit is fragmented into smaller packets of  Max_Packet_Size. 
+The Receiver end is configured to reveive the **Maximum Packet Size of 1024 bytes.**  This is also hardcoded on the Client end (i.e. the Sender). If a Data Frame Unit is larger than Max_Packet_Size, then that data-unit is fragmented into smaller packets of  1024. 
 
 These fragmented packets are sent at a much smaller time-interval than 10ms ( about 3ms, this value should be adjusted based on network congestion).
 
@@ -272,23 +280,44 @@ When a larger Video Data Unit is received it is fragmented into smaller 1024 siz
 1751528524405
 ```
 
-## Design
+## Design Philosophy
 
 ### Abstractions
+The design is based on following abstractions:
 
 #### Server 
-#### Client
-#### Packet
+A server is the entity which will wait and listen for connections over the internet.
+<br>It must perform the following basic actions:
 
-#### UDP_Server
-#### UDP_Client
+- **Start Listening**: It must start listening for connections over the internet. To be able to do that it most definitely has to acquire the Socket resources from the OS. So it must initialize and acquire the socket resource and start listening for connections on some specific Port. The connections can be made over TCP, UDP  or any other protocol depending on the system needs.
+
+- **Stop Listening**: It should be able to stop listening for connections and terminate existing connections, so it can prepare for shutting itself down.
+
+- **Shutdown**: It should safely return acquired resources like Sockets, file-handlers etc. back to the system in a clean manner. After this call the object will need to be re-initialized/re-created.
+
+#### Client
+The client is the entitiy whose sole purpose is to establish connection with the Server.
+
+- **Connect**:  To be able to conenct to the serve it **must** know the **iP address** and **Port** to connect on. It should also know what protocol is supported by the server and be able to connect over that.
+
+- **Disconnect**:  It should be able to terminate its current connection and re-connect if desired.
+
+- **Cleanup**: It should safely return acquired resources like Sockets, file-handlers etc. back to the system in a clean manner. After this call the object will need to be re-initialized/re-created.
+
+Based on these Ideas the current design looks like this. 
+
+There is a GenericServer and GenericClient which enforces the design constraints above and the idea is that more specialised clients and servers like UDP or TCP will support more specialized implementations in their chidl classes.
 
 <img src="images/uml_server.png" alt="UML Server" width="250"/>
-<img src="images/uml_clients.png" alt="UML Client" width="250"/>
-
+<img src="images/uml_clients.png" alt="UML Client" width="205"/>
 
 
 ## Tests
 
-Should I find time, i will add the Google Test framework for the unit-tests.
-◊
+There is support for tests added using Googles Testing Framework. 
+
+e.g. The sevrer module has tests which can be run using cTests: 
+
+```
+ctest --test-dir build -V
+```
