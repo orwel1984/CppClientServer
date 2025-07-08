@@ -6,6 +6,7 @@
 #include <boost/program_options.hpp>
 #include <iostream>
 #include <optional>
+#include <thread>
 
 #include "UDPClient.h"
 #include "VideoFileReader.hpp"
