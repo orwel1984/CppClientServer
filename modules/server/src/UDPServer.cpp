@@ -48,7 +48,7 @@ void UDPServer::receivePacket()
                                 { onPacketReceived(ec, bytes_transferred); });
 }
 
-void UDPServer::onPacketReceived(const boost::system::error_code& error, std::size_t bytes_recvd)
+void UDPServer::onPacketReceived(const boost::system::error_code& error, std::size_t size)
 {
     if(error)
     {
@@ -56,7 +56,9 @@ void UDPServer::onPacketReceived(const boost::system::error_code& error, std::si
         return;
     }
 
-    m_packetHandler(error, bytes_recvd, std::string_view(m_recv_buffer.data(), bytes_recvd));
+    // Handle Packet
+    m_packetHandler(error, size, std::string_view(m_recv_buffer.data(), size));
+
     if (m_running)
     {
         receivePacket();  // recursive async chain

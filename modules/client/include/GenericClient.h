@@ -4,7 +4,6 @@
 class GenericClient
 {
 public:
-    GenericClient(boost::asio::io_context& io_context, const std::string& ip, uint16_t port) {}
     virtual ~GenericClient() = default;
 
     virtual void connect() = 0;

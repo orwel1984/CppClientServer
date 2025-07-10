@@ -26,11 +26,11 @@ public:
     std::error_code stop() override;
     std::error_code shutdown() override;
 
+    // Packet Handling
 protected:
     void receivePacket();
-    void onPacketReceived(const boost::system::error_code &ec, std::size_t bytes_recvd);
+    void onPacketReceived(const boost::system::error_code &ec, std::size_t size);
     void processPacket(const std::error_code &ec, std::size_t len, std::string_view buffer);
-
 public: 
     void setPacketHandler(PacketHandler handler){ m_packetHandler = handler; }
     int getPacketSize() {return UDP_PACKET_SIZE;}

@@ -16,6 +16,7 @@
     - [Server](#server)
     - [Client](#client)
 - [Tests](#tests)
+- [Ideas](#ideas-for-better-design)
 
 ## Dependencies
 
@@ -324,3 +325,32 @@ e.g. The sevrer module has tests which can be run using cTests:
 ```
 ctest --test-dir build -V
 ```
+
+
+## IDEAS For BETTER Design
+
+### Policy Based Design
+
+```cpp
+  template<typename ProtocolPolicy, typename ModePolicy>
+  class Server : public GenericServer { ... };
+```
+
+### Composition Based
+
+```cpp
+class IServerLifecycle { /* as above */ };
+
+class TCPServerLifecycle : public IServerLifecycle { /* ... */ };
+class UDPServerLifecycle : public IServerLifecycle { /* ... */ };
+
+class Server {
+    std::unique_ptr<IServerLifecycle> lifecycle_;
+public:
+    Server(std::unique_ptr<IServerLifecycle> lifecycle)
+        : lifecycle_(std::move(lifecycle)) {}
+
+    void start() { lifecycle_->start(); }
+    void stop() { lifecycle_->stop(); }
+    void shutdown() { lifecycle_->shutdown(); }
+};```

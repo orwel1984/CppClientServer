@@ -7,8 +7,7 @@ class UDPClient : public GenericClient
 {
 public:
     UDPClient(boost::asio::io_context& io_context, const std::string& ip, uint16_t port)
-        : GenericClient(io_context, ip, port),
-          m_ip(ip),
+        : m_ip(ip),
           m_port(port),
           m_socket(io_context),
           m_serverEndpoint(boost::asio::ip::udp::v4(), port),
