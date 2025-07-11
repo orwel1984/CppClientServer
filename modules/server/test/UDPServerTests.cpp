@@ -3,7 +3,7 @@
 #include <boost/asio.hpp>
 #include <thread>
 
-#include "UDPServer.hpp"
+#include "UDPServer.h"
 
 using namespace boost::asio;
 using namespace boost::asio::ip;

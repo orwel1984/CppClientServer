@@ -1,5 +1,9 @@
 # Server library
-add_library(Server src/UDPServer.cpp)
+set(SERVER_SOURCES
+    src/UDPServer.cpp
+    src/Server.cpp
+)
+add_library(Server ${SERVER_SOURCES})
 
 target_include_directories(Server
     PUBLIC

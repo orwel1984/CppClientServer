@@ -2,7 +2,12 @@
 #include <iostream>
 
 #include "FileWriter.hpp"
-#include "UDPServer.hpp"
+
+#include "UDPServer.h"
+
+#include "BoostUDPPolicy.hpp"
+#include "Server.h"
+
 #include "Utils.hpp"
 #include "TimestampsLogger.hpp"
 
@@ -25,7 +30,8 @@ int main(int argc, char* argv[])
         TimestampLogger logger("timestamps.txt");
 
         // Setup a UDP based receiver server
-        UDPServer receiver(io, args["port"].as<int>());
+        // UDPServer receiver(io, args["port"].as<int>());
+        Server<BoostUDPPolicy, AsyncMode> receiver(io, args["port"].as<int>());
 
         // define a custom Packet-Handler to receive video datagrams
         auto filePacketHandler =
@@ -43,6 +49,7 @@ int main(int argc, char* argv[])
             }
             std::cout << "Received packet of size: " << len << std::endl;
         };
+        
         receiver.setPacketHandler(filePacketHandler);
 
         // now start listening

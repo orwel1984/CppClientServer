@@ -1,14 +1,13 @@
 #pragma once
 
+#include "GenericServer.h"
+
 #include <atomic>
 #include <boost/asio.hpp>
 #include <functional>
 
-#include "GenericServer.hpp"
-
 #define UDP_PACKET_SIZE 1024
 using PacketHandler = std::function<void(const std::error_code &, std::size_t, std::string_view)>;
-
 
 class UDPServer : public GenericServer
 {
