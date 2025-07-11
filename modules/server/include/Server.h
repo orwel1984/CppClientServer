@@ -43,7 +43,7 @@ public:
     void setPacketHandler(PacketHandler handler) { m_packetHandler = std::move(handler); }
 
 protected:
-    void receiveNextPacket();
+    // void receiveNextPacket();
     void onPacketReceived(const Error_Code& error, std::size_t len, std::string_view packet);
 
 private:

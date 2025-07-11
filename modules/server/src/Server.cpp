@@ -1,24 +1,8 @@
 #include "Server.h"
 #include "BoostUDPPolicy.hpp"
-#include <iostream>
+#include "ModePolicy.hpp"
+
 #include <string>
-
-namespace
-{
-    void Log(const std::string& message) { std::cout << message << std::endl; }
-
-    void Log(const std::error_code& error)
-    {
-        std::cout << "Error code: " << error.value() << std::endl;
-        std::cout << "Error message: " << error.message() << std::endl;
-    }
-
-    void Log(const std::string& message, const std::error_code& error)
-    {
-        Log(message);
-        Log(error);
-    }
-} // namespace
 
 // Template method implementations
 template <typename BackendPolicy, template <typename> class ModePolicy>
@@ -37,34 +21,11 @@ std::error_code Server<BackendPolicy, ModePolicy>::start()
 
     // listen for packets
     m_running = true;
-    receiveNextPacket();
+
+    // receiveNextPacket();    
+    ModePolicy<BackendPolicy>::run(m_running, m_socket, m_remoteEndpoint, m_buffer, m_packetHandler);
 
     return { }; // success
-}
-
-template <typename BackendPolicy, template <typename> class ModePolicy>
-void Server<BackendPolicy, ModePolicy>::receiveNextPacket()
-{
-    ModePolicy<BackendPolicy>::run(m_socket, m_remoteEndpoint, m_buffer,
-        [this](auto ec, auto size)
-        {
-            if (ec)
-            {
-                Log("Receive error", ec);
-                return;
-            }
-
-            Log("Received packet of size: " + std::to_string(size) + " from " + m_remoteEndpoint.address().to_string() + ":" + std::to_string(m_remoteEndpoint.port()));
-
-            // process data (only called when no error)
-            m_packetHandler(ec, size, std::string_view(m_buffer.data(), size));
-
-            if (m_running)
-            {
-                receiveNextPacket();  // recursive async chain
-            }                                           
-        }
-    );
 }
 
 template <typename BackendPolicy, template <typename> class ModePolicy>
@@ -108,3 +69,4 @@ std::error_code Server<BackendPolicy, ModePolicy>::shutdown()
 
 // Explicit template instantiations for the types we actually use
 template class Server<BoostUDPPolicy, AsyncMode>;
+template class Server<BoostUDPPolicy, SyncMode>;

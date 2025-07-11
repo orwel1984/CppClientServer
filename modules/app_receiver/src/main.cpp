@@ -5,8 +5,10 @@
 
 #include "UDPServer.h"
 
-#include "BoostUDPPolicy.hpp"
 #include "Server.h"
+#include "BoostUDPPolicy.hpp"
+#include "ModePolicy.hpp"
+
 
 #include "Utils.hpp"
 #include "TimestampsLogger.hpp"
@@ -31,9 +33,10 @@ int main(int argc, char* argv[])
 
         // Setup a UDP based receiver server
         // UDPServer receiver(io, args["port"].as<int>());
-        Server<BoostUDPPolicy, AsyncMode> receiver(io, args["port"].as<int>());
+        //Server<BoostUDPPolicy, AsyncMode> receiver(io, args["port"].as<int>());
+        Server<BoostUDPPolicy, SyncMode> receiver(io, args["port"].as<int>());
 
-        // define a custom Packet-Handler to receive video datagrams
+        // define a custom Packet-Handler to receive video datagrams        
         auto filePacketHandler =
             [&](const std::error_code& ec, std::size_t len, std::string_view packet)
         {
