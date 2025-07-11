@@ -3,16 +3,16 @@
 #include <vector>
 #include <atomic>
 
-template <typename BackendPolicy>
+template <typename Protocol>
 struct AsyncMode
 {
-    using Socket = typename BackendPolicy::Socket;
-    using Endpoint = typename BackendPolicy::Endpoint;
+    using Socket = typename Protocol::Socket;
+    using Endpoint = typename Protocol::Endpoint;
 
     template<typename Handler>
-    static void run(const std::atomic<bool>& isRunning,Socket& socket, Endpoint& remote, std::vector<char>& buffer, Handler&& handler)
+    static void receivePacket(const std::atomic<bool>& isRunning,Socket& socket, Endpoint& remote, std::vector<char>& buffer, Handler&& handler)
     {
-        socket.async_receive_from( BackendPolicy::makeBuffer(buffer), remote, 
+        socket.async_receive_from( Protocol::makeBuffer(buffer), remote, 
             [&](auto ec, auto size)
             {
                 if (ec){ Log("Receive error", ec); return;}                
@@ -23,28 +23,28 @@ struct AsyncMode
                 
                 // recursive call
                 if(isRunning){
-                    run(isRunning, socket, remote, buffer, std::forward<decltype(handler)>(handler));
+                    receivePacket(isRunning, socket, remote, buffer, std::forward<decltype(handler)>(handler));
                 }
             }
         );
     }
 };
 
-template<typename BackendPolicy>
+template<typename Protocol>
 struct SyncMode {
 
-    using Socket = typename BackendPolicy::Socket;
-    using Endpoint = typename BackendPolicy::Endpoint;
-    using Error_Code = typename BackendPolicy::error_code;
+    using Socket = typename Protocol::Socket;
+    using Endpoint = typename Protocol::Endpoint;
+    using Error_Code = typename Protocol::error_code;
 
     template<typename Handler>
-    static void run(const std::atomic<bool>& isRunning, Socket& socket, Endpoint& remote, std::vector<char>& buffer, Handler&& handler)
+    static void receivePacket(const std::atomic<bool>& isRunning, Socket& socket, Endpoint& remote, std::vector<char>& buffer, Handler&& handler)
     {
         while(isRunning)
         {
             // Receive packet
             Error_Code ec;
-            std::size_t size = socket.receive_from(BackendPolicy::makeBuffer(buffer), remote, 0, ec);
+            std::size_t size = socket.receive_from(Protocol::makeBuffer(buffer), remote, 0, ec);
     
             // Process packet
             handler(ec, size, std::string_view(buffer.data(), size));

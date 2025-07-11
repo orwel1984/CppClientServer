@@ -30,7 +30,6 @@ struct BoostUDPPolicy
     using error_code = boost::system::error_code;
 
     static auto makeBuffer(std::vector<char>& buffer) { return boost::asio::buffer(buffer); }
-
     static Endpoint makeEndpoint(unsigned short port) { return Endpoint(Protocol::v4(), port); }
 
     static std::error_code openAndBindSocket(Socket& socket, const Endpoint& endpoint)

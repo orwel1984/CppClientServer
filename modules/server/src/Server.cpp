@@ -5,56 +5,54 @@
 #include <string>
 
 // Template method implementations
-template <typename BackendPolicy, template <typename> class ModePolicy>
-std::error_code Server<BackendPolicy, ModePolicy>::start()
-{
-    // Create local endpoint for binding
-    auto localEndpoint = BackendPolicy::makeEndpoint(m_port);
-    
-    // init socket
-    auto ec = BackendPolicy::openAndBindSocket(m_socket, localEndpoint);
+template <typename Protocol, template <typename> class Mode>
+std::error_code Server<Protocol, Mode>::start()
+{   
+    // Init socket
+    auto ec = Protocol::openAndBindSocket(m_socket, Protocol::makeEndpoint(m_port));
     if (ec)
     {
         Log("Failed to open and bind socket", ec);
         return ec;
     }
 
-    // listen for packets
+    // Listen for packets
     m_running = true;
-
-    // receiveNextPacket();    
-    ModePolicy<BackendPolicy>::run(m_running, m_socket, m_remoteEndpoint, m_buffer, m_packetHandler);
+    Mode<Protocol>::receivePacket(m_running, m_socket, m_remoteEndpoint, m_buffer, m_packetHandler);
 
     return { }; // success
 }
 
-template <typename BackendPolicy, template <typename> class ModePolicy>
-void Server<BackendPolicy, ModePolicy>::onPacketReceived(const typename BackendPolicy::error_code& error, std::size_t len, std::string_view packet)
+template <typename Protocol, template <typename> class Mode>
+void Server<Protocol, Mode>::onPacketReceived(const typename Protocol::error_code& error, std::size_t len, std::string_view packet)
 {
     Log("Received packet of size: " + std::to_string(len));
     Log("Packet data: " + std::string(packet));
 }
 
-template <typename BackendPolicy, template <typename> class ModePolicy>
-std::error_code Server<BackendPolicy, ModePolicy>::stop()
+template <typename Protocol, template <typename> class Mode>
+std::error_code Server<Protocol, Mode>::stop()
 {
-    if (m_running)
+    // Atomically set m_running to false and check if it was previously true
+    if (!m_running.exchange(false)) 
     {
-        m_running = false;
-        typename BackendPolicy::error_code error;
-        auto result = m_socket.close(error);
-        if(error)
-        {
-            Log(error);
-            return error;
-        }
+        return {};
     }
+
+    typename Protocol::error_code error;        
+    m_socket.close(error);
+    if(error)
+    {
+        Log(error);
+        return error;
+    }
+
     Log("Server stopped successfully.");
     return {};  // success
 }
 
-template <typename BackendPolicy, template <typename> class ModePolicy>
-std::error_code Server<BackendPolicy, ModePolicy>::shutdown()
+template <typename Protocol, template <typename> class Mode>
+std::error_code Server<Protocol, Mode>::shutdown()
 {
     auto ec = stop();
     if (ec)
