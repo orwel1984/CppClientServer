@@ -1,6 +1,8 @@
 #pragma once
 
 #include <system_error>
+#include <expected>
+#include <string>
 
 enum class ServerError {
     success = 0,
@@ -45,4 +47,19 @@ namespace std
     struct is_error_code_enum<ServerError> : true_type {};
 }
 
-std::error_code make_error_code(ServerError e);
+inline std::error_code make_error_code(ServerError e)
+{
+    return {static_cast<int>(e), server_category()};
+}
+
+using EV = std::expected<void, std::error_code>;
+
+inline EV unexpected_error(ServerError e)
+{
+    return std::unexpected(make_error_code(e));
+}
+
+inline std::string server_error_message(ServerError e)
+{
+    return server_category().message(static_cast<int>(e));
+}

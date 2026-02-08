@@ -20,7 +20,7 @@ namespace impl
                 std::vector<char> &buffer, Handler &&handler)
             {
                 socket.async_receive_from(Protocol::makeBuffer(buffer), remote,
-                    [&](auto ec, auto size)
+                    [&](auto ec, auto size) // completion handler
                     {
                         if (ec)
                         {

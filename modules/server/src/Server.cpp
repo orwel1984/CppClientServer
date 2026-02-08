@@ -21,11 +21,11 @@ std::error_code
 Server<Protocol, Mode>::start()
 {
     // 1.   Init socket
-    auto ec = Protocol::openSocket(m_socket, Protocol::makeEndpoint(m_port));
-    if (ec)
+    auto r = Protocol::openSocket(m_socket, Protocol::makeEndpoint(m_port));
+    if (!r)
     {
-        logging::Log("Failed to open and bind socket", ec);
-        return ec;
+        logging::Log("Failed to open and bind socket", r.error());
+        return std::error_code(r.error().value(), r.error().category());
     }
 
     // 2.   Listen for packets

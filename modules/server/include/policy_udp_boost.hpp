@@ -5,6 +5,7 @@
 
 #include <boost/asio.hpp>
 #include <string>
+#include <expected>
 
 namespace impl
 {
@@ -21,29 +22,19 @@ namespace impl
             static auto makeBuffer(std::vector<char>& buffer) { return boost::asio::buffer(buffer); }
             static Endpoint makeEndpoint(unsigned short port) { return Endpoint(Protocol::v4(), port); }
 
-            static std::error_code 
+            static std::expected<void, std::error_code>
             openSocket(Socket& socket, const Endpoint& endpoint)
             {
                 boost::system::error_code ec;
                 
                 socket.open(endpoint.protocol(), ec);
-
-                if (ec)
-                {
-                    logging::Log("Socket open failed", ec); // Log Boost error
-                    return std::error_code(static_cast<int>(ServerError::socket_open_failed), server_category());
-                }
+                    if (ec) return unexpected_error(ServerError::socket_open_failed);
 
                 socket.bind(endpoint, ec);
+                    if (ec) return unexpected_error(ServerError::bind_failed);
 
-                if (ec)
-                {
-                    logging::Log("Socket bind failed", ec); // Log Boost error
-                    return std::error_code(static_cast<int>(ServerError::bind_failed), server_category());
-                }
                 logging::Log("Server started on port:" + std::to_string(endpoint.port()));
-
-                return {};  // success
+                return std::expected<void, error_code>{};  // success
             }
         };
 
