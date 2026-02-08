@@ -1,12 +1,27 @@
-BasedOnStyle: Google
+BasedOnStyle: LLVM
 Language: Cpp
-IndentWidth: 4
-TabWidth: 4
-UseTab: Never
-ColumnLimit: 100
+AlwaysBreakAfterReturnType: All
+AlwaysBreakTemplateDeclarations: Yes
+BinPackParameters: true
 BreakBeforeBraces: Allman
-AllowShortIfStatementsOnASingleLine: false
-IndentCaseLabels: false
-AccessModifierOffset: -4
+ColumnLimit: 120  # Changed from 0 to a reasonable limit
+ContinuationIndentWidth: 4
+IndentWidth: 4
 NamespaceIndentation: All
-FixNamespaceComments: false
+AlignAfterOpenBracket: DontAlign  # Prevents forced alignment
+PenaltyBreakBeforeFirstCallParameter: 100  # Helps with lambda positioning
+
+# Add these to your existing configuration ONLY for header files
+ForHeaderFiles:
+  AllowAllArgumentsOnNextLine: false
+  AllowAllParametersOfDeclarationOnNextLine: false
+  BinPackParameters: false
+  BreakBeforeBraces: Custom
+  BraceWrapping:
+    AfterClass: true
+    AfterStruct: true
+    AfterNamespace: false
+  MaxEmptyLinesToKeep: 1
+  PenaltyBreakBeforeFirstCallParameter: 200
+  PenaltyBreakComment: 300
+  PenaltyExcessCharacter: 100

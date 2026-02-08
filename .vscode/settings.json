@@ -1,0 +1,12 @@
+{
+    // "editor.formatOnSave": true,
+    "C_Cpp.formatting": "clangFormat",
+    "clang-format.style": "file",
+    "clang-format.fallbackStyle": "none"
+    // "C_Cpp.formatting.provider": "clangFormat",
+    "editor.parameterHints.enabled": false,
+    "C_Cpp.parameterHints.enabled": false,
+    "idf.pythonInstallPath": "/opt/homebrew/bin/python3",
+    // "editor.inlineSuggest.enabled": false,
+    // "editor.suggest.showParameterHints": false
+}

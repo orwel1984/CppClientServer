@@ -12,7 +12,8 @@
 #include "Utils.hpp"
 #include "VideoFileReader.hpp"
 
-int main(int argc, char* argv[])
+int
+main(int argc, char *argv[])
 {
     auto commandlineOpt = parseCommandline(argc, argv);
     if (!commandlineOpt)
@@ -20,7 +21,7 @@ int main(int argc, char* argv[])
         std::cout << "Failed to parse command line arguments." << std::endl;
         exit(1);
     }
-    const auto& args = *commandlineOpt;
+    const auto &args = *commandlineOpt;
 
     try
     {
@@ -41,7 +42,7 @@ int main(int argc, char* argv[])
 
         io.run();
     }
-    catch (std::exception& e)
+    catch (std::exception &e)
     {
         std::cerr << e.what() << std::endl;
     }

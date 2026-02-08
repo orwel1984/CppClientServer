@@ -3,7 +3,9 @@
 #include <boost/asio.hpp>
 #include <thread>
 
-#include "UDPServer.h"
+#include "server.h"
+#include "policy_udp_boost.hpp"
+#include "policy_mode.hpp"
 
 using namespace boost::asio;
 using namespace boost::asio::ip;
@@ -46,7 +48,7 @@ private:
 
     void initServer()
     {
-        server = std::make_unique<UDPServer>(context, serverPort);
+        server = std::make_unique<Server<impl::protocol::UDP, impl::mode::Async>>(context, serverPort);
         setupTestPacketHandler();
     }
     
@@ -66,7 +68,7 @@ protected:
     io_context::work workGuard{context};  // Initialize directly with context
 
     std::unique_ptr<std::thread> worker;
-    std::unique_ptr<UDPServer> server;
+    std::unique_ptr<Server<impl::protocol::UDP, impl::mode::Async>> server;
 
     // Test state
     std::string packet;
