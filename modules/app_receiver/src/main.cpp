@@ -1,3 +1,4 @@
+#include "policy_tcp_boost.hpp"
 #include "policy_udp_boost.hpp"
 #include "policy_mode.hpp"
 #include "server.h"
@@ -21,7 +22,7 @@ main(int argc, char *argv[])
     {
         boost::asio::io_context io;
         
-        Server<protocol::UDP, mode::Sync> server(io, port);
+        Server<protocol::TCP, mode::Sync> server(io, port);
         server.setPacketHandler(packetHandler(path, server) );
 
         if (auto ec = server.start(); ec)

@@ -1,5 +1,6 @@
 #include "policy_udp_boost.hpp"
 #include "policy_tcp_boost.hpp"
+
 #include "policy_mode.hpp"
 #include "server.h"
 #include "server_error.h"
@@ -10,7 +11,7 @@
 // Constructor
 template <typename Protocol, template <typename> class Mode>
 Server<Protocol, Mode>::Server(Context &io, uint16_t port, PacketHandler handler)
-    : m_socket(io), m_port(port), m_running(false)
+    : m_socket(io), m_port(port), m_running(false), m_io(io)
 {
     m_buffer.resize(UDP_PACKET_SIZE);
     m_packetHandler = (handler) ? std::move(handler)
@@ -22,12 +23,22 @@ template <typename Protocol, template <typename> class Mode>
 std::error_code
 Server<Protocol, Mode>::start()
 {
-    if( auto open = Protocol::openSocket(m_socket, Protocol::makeEndpoint(m_port)); !open)
+    if( auto open = Protocol::openSocket(m_socket, m_acceptor, Protocol::makeEndpoint(m_port), m_io); !open)
     {
         return open.error();
     }
 
     m_running = true;
+
+    // TCP 
+    if constexpr (std::is_same_v<Protocol, impl::protocol::TCP>)
+    {
+        logging::Log("Waiting for TCP client to connect...");
+        typename Protocol::error_code ec;
+        m_acceptor->accept(m_socket, ec);
+        if (ec){ return make_error_code(ServerError::socket_open_failed);}
+        logging::Log("TCP client connected.");        
+    }
 
     if( auto recv = Mode<Protocol>::receivePacket(m_running, m_socket, m_remoteEndpoint, m_buffer, m_packetHandler); !recv)
     {        

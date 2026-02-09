@@ -48,6 +48,7 @@ protected:
   void onPacketReceived(const Error_Code &error, std::size_t len, std::string_view packet);
 
 private:
+  Context& m_io;
   Socket m_socket;
   
   Endpoint m_remoteEndpoint;
@@ -57,4 +58,6 @@ private:
   std::atomic<bool> m_running;
   
   PacketHandler m_packetHandler;
+
+  std::optional<typename Protocol::Acceptor> m_acceptor;
 };

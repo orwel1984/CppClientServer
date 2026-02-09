@@ -1,6 +1,9 @@
 
 #pragma once
 #include "server_error.h"
+#include "policy_udp_boost.hpp"
+#include "policy_tcp_boost.hpp"
+
 #include <atomic>
 #include <vector>
 #include <expected>
@@ -58,11 +61,18 @@ namespace impl
                 while (isRunning)
                 {
                     Error_Code ec;
-                    std::size_t size = socket.receive_from( Protocol::makeBuffer(buffer),remote, 0, ec);
 
-                    if (ec) return std::unexpected(toServerError(ec));
+                    if constexpr (std::is_same_v<Protocol, impl::protocol::TCP>) {
+                        std::size_t size = socket.read_some(Protocol::makeBuffer(buffer), ec);
+                        if (ec) return std::unexpected(toServerError(ec));
+                        handler(toServerError(ec), size, std::string_view(buffer.data(), size));
 
-                    handler(toServerError(ec), size, std::string_view(buffer.data(), size));
+                    } else { // UDP
+                        std::size_t size = socket.receive_from(Protocol::makeBuffer(buffer), remote, 0, ec);
+                        if (ec) return std::unexpected(toServerError(ec));
+                        handler(toServerError(ec), size, std::string_view(buffer.data(), size));
+                    }
+
                 }
                 return {};
             }

@@ -4,6 +4,8 @@
 #include "logging.hpp"
 
 #include <boost/asio.hpp>
+#include <cstddef>
+#include <optional>
 #include <string>
 #include <expected>
 
@@ -17,21 +19,18 @@ namespace impl
             using Protocol = boost::asio::ip::udp;
             using Endpoint = Protocol::endpoint;
             using Socket = boost::asio::ip::udp::socket;
+            using Acceptor = std::nullptr_t; // UDP doesn't have acceptor
             using error_code = boost::system::error_code;
 
             static auto makeBuffer(std::vector<char>& buffer) { return boost::asio::buffer(buffer); }
-            static Endpoint makeEndpoint(unsigned short port) { return Endpoint(Protocol::v4(), port); }
+            static Endpoint makeEndpoint(unsigned short  port) { return Endpoint(Protocol::v4(), port); }
 
             static std::expected<void, std::error_code>
-            openSocket(Socket& socket, const Endpoint& endpoint)
+            openSocket(Socket& socket, std::optional<std::nullptr_t>&, const Endpoint& endpoint, Context& io)
             {
-                boost::system::error_code ec;
-                
-                socket.open(endpoint.protocol(), ec);
-                if (ec) return unexpected_error(ServerError::socket_open_failed);
-
-                socket.bind(endpoint, ec);
-                if (ec) return unexpected_error(ServerError::bind_failed);
+                boost::system::error_code ec;                
+                socket.open(endpoint.protocol(), ec); if (ec) return unexpected_error(ServerError::socket_open_failed);
+                socket.bind(endpoint, ec); if (ec) return unexpected_error(ServerError::bind_failed);
 
                 logging::Log("Server started on port:" + std::to_string(endpoint.port()));
                 return {};
