@@ -1,8 +1,9 @@
 
 #pragma once
+#include "server_error.h"
 #include <atomic>
 #include <vector>
-#include "logging.hpp"
+#include <expected>
 
 namespace impl
 {
@@ -15,30 +16,26 @@ namespace impl
             using Endpoint = typename Protocol::Endpoint;
 
             template <typename Handler>
-            static void
-            receivePacket(const std::atomic<bool> &isRunning, Socket &socket, Endpoint &remote,
-                std::vector<char> &buffer, Handler &&handler)
+            static std::expected<void, std::error_code>
+            receivePacket(
+                const std::atomic<bool>& isRunning,
+                Socket& socket,
+                Endpoint& remote,
+                std::vector<char>& buffer,
+                Handler&& handler)
             {
-                socket.async_receive_from(Protocol::makeBuffer(buffer), remote,
-                    [&](auto ec, auto size) // completion handler
+                socket.async_receive_from(  Protocol::makeBuffer(buffer), remote,
+                    [&, handler = std::forward<Handler>(handler)]
+                    (auto ec, auto size) mutable
                     {
-                        if (ec)
-                        {
-                            logging::Log("Receive error", ec);
-                            return;
-                        }
-                            logging::Log("Received packet of size: " + std::to_string(size) + " from " +
-                                remote.address().to_string() + ":" + std::to_string(remote.port()));
+                        if (ec) { handler(toServerError(ec), 0, {}); return; }
+                        handler(toServerError(ec), size, std::string_view(buffer.data(), size));
 
-                        // process packet
-                        handler(ec, size, std::string_view(buffer.data(), size));
-
-                        // recursive
-                        if (isRunning)
-                        {
-                            receivePacket(isRunning, socket, remote, buffer, std::forward<decltype(handler)>(handler));
+                        if (isRunning) {
+                            receivePacket(isRunning, socket, remote, buffer, std::move(handler));
                         }
                     });
+                return {}; // async started successfully
             }
         };
 
@@ -50,19 +47,24 @@ namespace impl
             using Error_Code = typename Protocol::error_code;
 
             template <typename Handler>
-            static void
-            receivePacket(const std::atomic<bool> &isRunning, Socket &socket, Endpoint &remote,
-                std::vector<char> &buffer, Handler &&handler)
+            static std::expected<void, std::error_code>
+            receivePacket(
+                const std::atomic<bool>& isRunning,
+                Socket& socket,
+                Endpoint& remote,
+                std::vector<char>& buffer,
+                Handler&& handler)
             {
                 while (isRunning)
                 {
-                    // Receive packet
                     Error_Code ec;
-                    std::size_t size = socket.receive_from(Protocol::makeBuffer(buffer), remote, 0, ec);
+                    std::size_t size = socket.receive_from( Protocol::makeBuffer(buffer),remote, 0, ec);
 
-                    // Process packet
-                    handler(ec, size, std::string_view(buffer.data(), size));
+                    if (ec) return std::unexpected(toServerError(ec));
+
+                    handler(toServerError(ec), size, std::string_view(buffer.data(), size));
                 }
+                return {};
             }
         };
 

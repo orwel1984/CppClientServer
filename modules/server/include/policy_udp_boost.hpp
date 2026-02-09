@@ -28,13 +28,13 @@ namespace impl
                 boost::system::error_code ec;
                 
                 socket.open(endpoint.protocol(), ec);
-                    if (ec) return unexpected_error(ServerError::socket_open_failed);
+                if (ec) return unexpected_error(ServerError::socket_open_failed);
 
                 socket.bind(endpoint, ec);
-                    if (ec) return unexpected_error(ServerError::bind_failed);
+                if (ec) return unexpected_error(ServerError::bind_failed);
 
                 logging::Log("Server started on port:" + std::to_string(endpoint.port()));
-                return std::expected<void, error_code>{};  // success
+                return {};
             }
         };
 

@@ -8,6 +8,8 @@
 #include <iostream>
 #include <cstdlib>
 
+#include "logging.hpp"
+
 using namespace impl;
 
 int
@@ -19,9 +21,13 @@ main(int argc, char *argv[])
     {
         boost::asio::io_context io;
         
-        Server<protocol::UDP, mode::Async> server(io, port);
+        Server<protocol::UDP, mode::Sync> server(io, port);
         server.setPacketHandler(packetHandler(path, server) );
-        server.start();
+
+        if (auto ec = server.start(); ec)
+        {
+            logging::Log("Server failed:" + server_error_message(ec));
+        }
 
         io.run();
     }

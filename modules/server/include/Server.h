@@ -3,14 +3,14 @@
 #include <atomic>
 #include <functional>
 
-#include "GenericServer.h"
+#include "IServer.h"
 
 #define UDP_PACKET_SIZE 1024
 using PacketHandler =
     std::function<void(const std::error_code &, std::size_t, std::string_view)>;
 
 /**
-    A Server class that implements the GenericServer interface based on 
+    A Server class that implements the IServer interface based on 
     selected plicies for Protocol and Mode  :
 
    - The Protocol Policy:  Decides whether this is a TCP/UDP/CAN based server and provide a Socket that can support it. 
@@ -24,7 +24,7 @@ using PacketHandler =
 
  */
 template <typename Protocol, template <typename> class Mode>
-class Server : public GenericServer
+class Server : public IServer
 {
   using Socket = typename Protocol::Socket;
   using Endpoint = typename Protocol::Endpoint;
@@ -34,7 +34,7 @@ class Server : public GenericServer
 public:
   Server(Context &io, uint16_t port, PacketHandler handler = nullptr);
 
-  // Generic-Server interface
+  // IServer interface
   std::error_code start() override;
   std::error_code stop() override;
   std::error_code shutdown() override;
@@ -49,6 +49,7 @@ protected:
 
 private:
   Socket m_socket;
+  
   Endpoint m_remoteEndpoint;
   uint16_t m_port;
 

@@ -310,7 +310,7 @@ The client is the entitiy whose sole purpose is to establish connection with the
 
 Based on these Ideas the current design looks like this. 
 
-There is a GenericServer and GenericClient interface which enforces the design constraints above. The more specialised clients and servers like UDP or TCP will support more specialized implementations of their concrete classes.
+There is an IServer and GenericClient interface which enforces the design constraints above. The more specialised clients and servers like UDP or TCP will support more specialized implementations of their concrete classes.
 
 <img src="images/uml_server.png" alt="UML Server" width="250"/>
 <img src="images/uml_clients.png" alt="UML Client" width="205"/>

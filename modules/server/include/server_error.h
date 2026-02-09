@@ -4,6 +4,9 @@
 #include <expected>
 #include <string>
 
+#include <boost/asio/error.hpp>
+#include <boost/system/error_code.hpp>
+
 enum class ServerError {
     success = 0,
     socket_open_failed,
@@ -12,6 +15,7 @@ enum class ServerError {
     receive_failed,
     timeout,
     connection_reset,
+    close_failed,
     unknown
 };
 
@@ -29,6 +33,8 @@ struct ServerErrorCategory : public std::error_category
             case ServerError::receive_failed: return "Failed to receive data";
             case ServerError::timeout: return "Operation timed out";
             case ServerError::connection_reset: return "Connection reset by peer";
+            case ServerError::close_failed: return "Failed to close socket";
+            case ServerError::unknown: return "Unknown server error";
             default: return "Unknown server error";
         }
     }
@@ -63,3 +69,24 @@ inline std::string server_error_message(ServerError e)
 {
     return server_category().message(static_cast<int>(e));
 }
+
+// Helper: translate std::error_code to message (only correct when ec is from server category)
+inline std::string server_error_message(const std::error_code& ec)
+{
+    if (ec.category() != server_category())
+        return ec.message();
+    return server_category().message(ec.value());
+}
+
+// Map Boost.Asio / boost::system error to ServerError (temporary; protocol-agnostic mapping)
+inline std::error_code toServerError(const boost::system::error_code& ec)
+{
+    if (!ec) return {};
+    namespace asio_err = boost::asio::error;
+    if (ec == asio_err::connection_reset || ec == asio_err::connection_refused)
+        return make_error_code(ServerError::connection_reset);
+    if (ec == asio_err::timed_out)
+        return make_error_code(ServerError::timeout);
+    return make_error_code(ServerError::receive_failed);
+}
+

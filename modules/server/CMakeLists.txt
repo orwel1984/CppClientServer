@@ -1,7 +1,6 @@
 # Server library
 set(SERVER_SOURCES
-    src/UDPServer.cpp
-    src/Server.cpp
+    src/server.cpp
 )
 add_library(Server ${SERVER_SOURCES})
 

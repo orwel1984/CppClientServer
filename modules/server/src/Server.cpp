@@ -1,7 +1,9 @@
-
 #include "policy_udp_boost.hpp"
+#include "policy_tcp_boost.hpp"
 #include "policy_mode.hpp"
 #include "server.h"
+#include "server_error.h"
+#include "logging.hpp"
 
 #include <string>
 
@@ -20,41 +22,36 @@ template <typename Protocol, template <typename> class Mode>
 std::error_code
 Server<Protocol, Mode>::start()
 {
-    // 1.   Init socket
-    auto r = Protocol::openSocket(m_socket, Protocol::makeEndpoint(m_port));
-    if (!r)
+    if( auto open = Protocol::openSocket(m_socket, Protocol::makeEndpoint(m_port)); !open)
     {
-        logging::Log("Failed to open and bind socket", r.error());
-        return std::error_code(r.error().value(), r.error().category());
+        return open.error();
     }
 
-    // 2.   Listen for packets
     m_running = true;
-    Mode<Protocol>::receivePacket(m_running, m_socket, m_remoteEndpoint, m_buffer, m_packetHandler);
 
-    return {}; // success
+    if( auto recv = Mode<Protocol>::receivePacket(m_running, m_socket, m_remoteEndpoint, m_buffer, m_packetHandler); !recv)
+    {        
+        return recv.error();
+    }
+    return {};
 }
 
 template <typename Protocol, template <typename> class Mode>
 std::error_code
 Server<Protocol, Mode>::stop()
 {
-    // Atomically set m_running to false and check if it was previously true
     if (!m_running.exchange(false))
-    {
         return {};
-    }
-    
-    typename Protocol::error_code error;
-    m_socket.close(error);
-    if (error)
+
+    typename Protocol::error_code ec;
+    m_socket.close(ec);
+    if (ec)
     {
-        logging::Log(error);
-        return error;
+        return make_error_code(ServerError::close_failed);
     }
 
     logging::Log("Server stopped successfully.");
-    return {}; // success
+    return {};
 }
 
 template <typename Protocol, template <typename> class Mode>
@@ -64,11 +61,9 @@ Server<Protocol, Mode>::shutdown()
     auto ec = stop();
     if (ec)
     {
-        logging::Log("Error during shutdown", ec);
         return ec;
     }
 
-    logging::Log("Server shutdown complete.");
     return {}; // success
 }
 
@@ -84,3 +79,4 @@ Server<Protocol, Mode>::onPacketReceived(
 // Explicit template instantiations for the types we actually use
 template class Server<impl::protocol::UDP, impl::mode::Async>;
 template class Server<impl::protocol::UDP, impl::mode::Sync>;
+template class Server<impl::protocol::TCP, impl::mode::Sync>;
