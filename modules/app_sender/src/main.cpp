@@ -9,6 +9,7 @@
 #include <ostream>
 
 #include "UDPClient.h"
+#include "TCPClient.h"
 #include "Utils.hpp"
 #include "VideoFileReader.hpp"
 
@@ -34,7 +35,7 @@ main(int argc, char *argv[])
         timer.async_wait(
             [&](auto... vn)
             {
-                auto client = std::make_shared<UDPClient>(io, args["ip"].as<std::string>(), args["port"].as<int>());
+                auto client = std::make_shared<TCPClient>(io, args["ip"].as<std::string>(), args["port"].as<int>());
                 client->connect();
 
                 sendVideoFrameEvery10ms(videoFramesReader, client);

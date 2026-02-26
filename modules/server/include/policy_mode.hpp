@@ -27,17 +27,25 @@ namespace impl
                 std::vector<char>& buffer,
                 Handler&& handler)
             {
-                socket.async_receive_from(  Protocol::makeBuffer(buffer), remote,
-                    [&, handler = std::forward<Handler>(handler)]
+                auto lambda = [&, handler = std::forward<Handler>(handler)]
                     (auto ec, auto size) mutable
                     {
                         if (ec) { handler(toServerError(ec), 0, {}); return; }
+                        
                         handler(toServerError(ec), size, std::string_view(buffer.data(), size));
 
                         if (isRunning) {
                             receivePacket(isRunning, socket, remote, buffer, std::move(handler));
                         }
-                    });
+                    };
+
+                if constexpr (std::is_same_v<Protocol, impl::protocol::TCP>) { 
+                    // TODO : Check the TCP logic for async_receive
+                    socket.async_receive(   Protocol::makeBuffer(buffer), lambda );
+                } else { // UDP 
+                    // UDP socket uses async_receive_from
+                    socket.async_receive_from(  Protocol::makeBuffer(buffer), remote, lambda);
+                }                
                 return {}; // async started successfully
             }
         };

@@ -21,6 +21,7 @@ public:
     void connect() override;
     void disconnect() override { m_socket.close(); }
     void cleanup() override {  disconnect(); }
+    
     void sendPacket(const std::vector<std::byte>& buffer);
 
 protected:

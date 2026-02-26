@@ -14,9 +14,7 @@ Server<Protocol, Mode>::Server(Context &io, uint16_t port, PacketHandler handler
     : m_socket(io), m_port(port), m_running(false), m_io(io)
 {
     m_buffer.resize(UDP_PACKET_SIZE);
-    m_packetHandler = (handler) ? std::move(handler)
-                                : std::bind(&Server::onPacketReceived, this, std::placeholders::_1,
-                                      std::placeholders::_2, std::placeholders::_3);
+    m_packetHandler = (handler) ? std::move(handler) : std::bind(&Server::onPacketReceived, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3);
 }
 
 template <typename Protocol, template <typename> class Mode>
@@ -91,3 +89,4 @@ Server<Protocol, Mode>::onPacketReceived(
 template class Server<impl::protocol::UDP, impl::mode::Async>;
 template class Server<impl::protocol::UDP, impl::mode::Sync>;
 template class Server<impl::protocol::TCP, impl::mode::Sync>;
+template class Server<impl::protocol::TCP, impl::mode::Async>;

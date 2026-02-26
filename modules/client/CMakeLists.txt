@@ -1,5 +1,10 @@
 # Client library
-add_library(Client src/UDPClient.cpp)
+set(CLIENT_SOURCES
+    src/UDPClient.cpp
+    src/TCPClient.cpp
+)
+
+add_library(Client ${CLIENT_SOURCES})
 
 target_include_directories(Client
     PUBLIC
