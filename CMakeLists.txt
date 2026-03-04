@@ -24,5 +24,8 @@ configure_googletest()
 # Modules
 add_subdirectory(modules/client)
 add_subdirectory(modules/server)
-add_subdirectory(modules/app_receiver)
-add_subdirectory(modules/app_sender)
+
+# Apps
+add_subdirectory(apps/receiver)
+add_subdirectory(apps/sender)
+
