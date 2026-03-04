@@ -5,6 +5,10 @@
 #include <boost/asio/ip/tcp.hpp>
 #include <boost/asio/io_context.hpp>
 
+// bring in the existing protocol policies (originally written for server)
+#include "policy_tcp_boost.hpp"
+#include "policy_udp_boost.hpp"
+
 #include "IClient.h"
 
 template <typename Protocol>

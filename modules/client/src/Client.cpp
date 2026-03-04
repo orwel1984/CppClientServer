@@ -1,9 +1,17 @@
 #include "Client.h"
 
+#include "policy_tcp_boost.hpp"  // protocols provide client helpers
+#include "policy_udp_boost.hpp"
+
+#include <iostream>
+#include <exception>
+#include <boost/asio/write.hpp>
+
+// resolve endpoint using the protocol-specific address version helper
 template <typename Protocol>
 void Client<Protocol>::resolveEndPoint()
 {
-    auto endpoints = m_resolver.resolve( Protocol::version,  m_ip, std::to_string(m_port));
+    auto endpoints = m_resolver.resolve(Protocol::version(), m_ip, std::to_string(m_port));
     m_serverEndpoint = *endpoints.begin();
 }
 
@@ -12,10 +20,10 @@ void Client<Protocol>::connect()
 {
     try
     {
-        m_socket.connect(m_serverEndpoint);
+        Protocol::connectSocket(m_socket, m_serverEndpoint);
         logConnectionSuccess();
     }
-    catch (const std::exception& ex)
+    catch (const std::exception &ex)
     {
         logConnectionFail(ex);
     }
@@ -24,18 +32,14 @@ void Client<Protocol>::connect()
 template <typename Protocol>
 void Client<Protocol>::disconnect()
 {
-    if (m_socket.is_open())
-    {
-        boost::system::error_code ec;
-        m_socket.shutdown(boost::asio::ip::tcp::socket::shutdown_both, ec);
-        m_socket.close(ec);
-    }
+    Protocol::disconnectSocket(m_socket);
 }
 
+// send the packet through the policy send helper
 template <typename Protocol>
-void Client<Protocol>::sendPacket(const std::vector<std::byte>& buffer)
+void Client<Protocol>::sendPacket(const std::vector<std::byte> &buffer)
 {
-    boost::asio::write(m_socket, boost::asio::buffer(buffer));
+    Protocol::send(m_socket, buffer);
 }
 
 template <typename Protocol>
@@ -49,10 +53,14 @@ void Client<Protocol>::logConnectionSuccess()
 }
 
 template <typename Protocol>
-void Client<Protocol>::logConnectionFail(const std::exception& ex)
+void Client<Protocol>::logConnectionFail(const std::exception &ex)
 {
     std::cout << "Unable to connect to "
               << m_ip << ":" << m_port
               << "\nError: " << ex.what()
               << std::endl;
 }
+
+// explicit template instantiations for the protocols we currently use
+template class Client<impl::protocol::UDP>;
+template class Client<impl::protocol::TCP>;

@@ -3,7 +3,7 @@
 #include <boost/asio.hpp>
 #include <thread>
 
-#include "server.h"
+#include "Server.h"
 #include "policy_udp_boost.hpp"
 #include "policy_mode.hpp"
 

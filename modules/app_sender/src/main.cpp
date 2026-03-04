@@ -8,10 +8,11 @@
 #include <iostream>
 #include <ostream>
 
-#include "UDPClient.h"
-#include "TCPClient.h"
+#include "Client.h"
 #include "Utils.hpp"
 #include "VideoFileReader.hpp"
+
+using namespace impl;
 
 int
 main(int argc, char *argv[])
@@ -19,10 +20,13 @@ main(int argc, char *argv[])
     auto commandlineOpt = parseCommandline(argc, argv);
     if (!commandlineOpt)
     {
-        std::cout << "Failed to parse command line arguments." << std::endl;
+        std::cout << "Failed to parse command-line." << std::endl;
         exit(1);
     }
+
     const auto &args = *commandlineOpt;
+    const auto ip = args["ip"].as<std::string>();
+    const auto port = args["port"].as<int>();
 
     try
     {
@@ -34,8 +38,8 @@ main(int argc, char *argv[])
 
         timer.async_wait(
             [&](auto... vn)
-            {
-                auto client = std::make_shared<TCPClient>(io, args["ip"].as<std::string>(), args["port"].as<int>());
+            {                
+                auto client = std::make_shared<Client<protocol::TCP>>(io, ip, port);
                 client->connect();
 
                 sendVideoFrameEvery10ms(videoFramesReader, client);

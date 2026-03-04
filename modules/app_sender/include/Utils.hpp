@@ -52,8 +52,9 @@ std::optional<boost::program_options::variables_map> parseCommandline(int argc, 
     return args;
 }
 
+template <typename Protocol>
 void sendFragmentedFrame(std::shared_ptr<VideoFileReader> fileReader,
-                         std::shared_ptr<TCPClient> client, const std::vector<std::byte>& chunk,
+                         std::shared_ptr<Client<Protocol>> client, const std::vector<std::byte>& chunk,
                          const size_t MAX_PACKET_SIZE)
 {
     for (size_t offset = 0; offset < chunk.size(); offset += MAX_PACKET_SIZE)
@@ -66,8 +67,9 @@ void sendFragmentedFrame(std::shared_ptr<VideoFileReader> fileReader,
     }
 }
 
+template <typename Protocol>
 void sendVideoFrameEvery10ms(std::shared_ptr<VideoFileReader> fileReader,
-                             std::shared_ptr<TCPClient> client)
+                             std::shared_ptr<Client<Protocol>> client)
 {
     const size_t MAX_PACKET_SIZE = 1024;
 

@@ -1,6 +1,6 @@
 # Server library
 set(SERVER_SOURCES
-    src/server.cpp
+    src/Server.cpp
 )
 add_library(Server ${SERVER_SOURCES})
 

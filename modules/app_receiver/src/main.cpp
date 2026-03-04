@@ -1,7 +1,7 @@
 #include "policy_tcp_boost.hpp"
 #include "policy_udp_boost.hpp"
 #include "policy_mode.hpp"
-#include "server.h"
+#include "Server.h"
 
 #include "Utils.hpp"
 
