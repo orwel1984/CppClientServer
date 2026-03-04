@@ -1,7 +1,5 @@
 #pragma once
 
-// client side protocol helpers for TCP
-
 #include <vector>
 #include <string>
 
@@ -23,18 +21,14 @@ namespace impl
             using Resolver  = Protocol::resolver;
             using error_code = boost::system::error_code;
 
-            // resolver needs an address family object
-            // some asio resolvers take a 'protocol' object; the easiest
-            // thing is to return an IPv4 protocol instance directly.
             static Protocol version() { return Protocol::v4(); }
 
-            // connect/close helpers that mirror the old concrete TCPClient
-            static void connectSocket(Socket &socket, const Endpoint &endpoint)
+            static void connect(Socket &socket, const Endpoint &endpoint)
             {
                 socket.connect(endpoint);
             }
 
-            static void disconnectSocket(Socket &socket)
+            static void disconnect(Socket &socket)
             {
                 if (socket.is_open()) {
                     error_code ec;

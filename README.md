@@ -29,9 +29,9 @@ The project will be built with atleast C++17.
 
 Project has the following folder structure:
 ```
-├── cmake/
 ├── external/
 ├── modules/
+├── apps/
 ├── CMakeLists.txt
 ├── build.sh
 ```
@@ -40,20 +40,26 @@ Project dependencies need to go into the **external** folder.
 <br>
 For now, only the contents of the Boost libraries are required.
 
-Inside the **modules** folders are all the modules and artifacts that will be built by the project.
+Inside the **modules** and **apps** folders are all the modules and artifacts that will be built by the project.
 <br>There are four main modules which are built:
 
 ```
 ├── modules/
-│   ├── app_receiver/
-│   ├── app_sender/
 │   ├── client/
 │   └── server/
 ```
-All exeutable targets are prefixed with "app_".  As you can see the two apps for sender and receiver.
+
+All exeutable targets are contained inside "apps" folder.  As you can see the two apps for Sender (the Clinet) and receiver (the Server):
+
+```
+├── apps/
+│   ├── sender/
+│   └── receiver/
+```
+
 While all other modules are built into static library targets.
 
-Every module internally should contain the following structure for source files: 
+Every module or app internally contains the following structure for source files: 
 
 ```
 ├── <module-name>/
@@ -68,7 +74,7 @@ This modular structure ensures smaller artifact sizes and smaller compile and bu
 
 If you have'nt already copied boost into the project, you can use the following script to automate this step:
 
-Simly run the ./download-dependecy.sh script from project root, it will downlaod and extract boost correctly as is required by the build step:
+Simply run the ./download-dependecy.sh script from project root, it will downlaod and extract boost correctly as is required by the build step:
 
 ```
 ./download-dependecy.sh
@@ -120,7 +126,7 @@ Once built, the artifacts for sender and reciever app will be avialable inside: 
 First run the Receiver app (which is a UDP Server):
 
 ```
-./build/modules/app_receiver/ReceiverApp ~/Downloads/received.bin 12345
+./build/apps/receiver/ReceiverApp ~/Downloads/received.bin 12345
 ```
 The first paramter is the received file path and second is port number.
 <br>
@@ -132,7 +138,7 @@ UDPServer started on port 12345
 Once the receiver starts receiving packets from the client it will output how many packets it has received like this: 
 
 ```
-╰─ ./build/modules/app_receiver/ReceiverApp ~/Downloads/received.bin 12345
+╰─ ./build/apps/receiver/ReceiverApp ~/Downloads/received.bin 12345
 
 UDPServer started on port 12345
 Received packet of size: 6
@@ -175,7 +181,7 @@ UDPServer shutdown complete.
 #### Sender App
 Then run the Sender app like:
 ```
-./build/modules/app_sender/SenderApp front_0_.bin localhost 12345
+./build/apps/sender/SenderApp front_0_.bin localhost 12345
 ```
 The sender will start reading chunks of file and start tranfering to the server. Once all the file chunks are sent the client will close the connection. 
 
@@ -186,7 +192,7 @@ Connected to 127.0.0.1:12345
 
 And then the client will immediately start sending file chunks to the server:
 ```
-╰─ ./build/modules/app_sender/SenderApp ~/Downloads/front_0_2.bin localhost 12345
+╰─ ./build/apps/sender/SenderApp ~/Downloads/front_0_2.bin localhost 12345
 Connected to 127.0.0.1:12345
 Read chunk of size: 6
 Read chunk of size: 32
@@ -204,9 +210,9 @@ All frames sent.
 
 ## Protocol
 
-The client reads the file in the following way: 
+The client reads a binary file, which represents raw video frames, in the following way: 
 
-First 4 bytes are read, which gives the length N1 of the Frame-1.
+First 4 bytes, gives the length N1 of the Frame-1.
 <br>
 Then next 4 bytes are read, which gives the length N2 of the Frame-2.
 <br>
@@ -325,27 +331,3 @@ e.g. The sevrer module has tests which can be run using cTests:
 ```
 ctest --test-dir build -V
 ```
-
-
-## IDEAS For BETTER Design
-
-### Policy Based Design
-
-### Composition Based
-
-```cpp
-class IServerLifecycle { /* as above */ };
-
-class TCPServerLifecycle : public IServerLifecycle { /* ... */ };
-class UDPServerLifecycle : public IServerLifecycle { /* ... */ };
-
-class Server {
-    std::unique_ptr<IServerLifecycle> lifecycle_;
-public:
-    Server(std::unique_ptr<IServerLifecycle> lifecycle)
-        : lifecycle_(std::move(lifecycle)) {}
-
-    void start() { lifecycle_->start(); }
-    void stop() { lifecycle_->stop(); }
-    void shutdown() { lifecycle_->shutdown(); }
-};```

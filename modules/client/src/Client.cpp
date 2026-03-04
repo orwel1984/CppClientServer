@@ -20,7 +20,8 @@ void Client<Protocol>::connect()
 {
     try
     {
-        Protocol::connectSocket(m_socket, m_serverEndpoint);
+        Protocol::connect(m_socket, m_serverEndpoint);
+        
         logConnectionSuccess();
     }
     catch (const std::exception &ex)
@@ -32,7 +33,7 @@ void Client<Protocol>::connect()
 template <typename Protocol>
 void Client<Protocol>::disconnect()
 {
-    Protocol::disconnectSocket(m_socket);
+    Protocol::disconnect(m_socket);
 }
 
 // send the packet through the policy send helper

@@ -24,14 +24,14 @@ namespace impl
 
             static Protocol version() { return Protocol::v4(); }
 
-            static void connectSocket(Socket &socket, const Endpoint &endpoint)
+            static void connect(Socket &socket, const Endpoint &endpoint)
             {
                 // UDP "connect" simply sets the default remote endpoint
                 socket.open(Protocol::v4());
                 socket.connect(endpoint);
             }
 
-            static void disconnectSocket(Socket &socket)
+            static void disconnect(Socket &socket)
             {
                 error_code ec;
                 socket.close(ec);
