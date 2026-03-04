@@ -20,12 +20,7 @@ namespace impl
 
             template <typename Handler>
             static std::expected<void, std::error_code>
-            receivePacket(
-                const std::atomic<bool>& isRunning,
-                Socket& socket,
-                Endpoint& remote,
-                std::vector<char>& buffer,
-                Handler&& handler)
+            receivePacket( const std::atomic<bool>& isRunning,  Socket& socket, Endpoint& remote,   std::vector<char>& buffer,  Handler&& handler)
             {
                 auto lambda = [&, handler = std::forward<Handler>(handler)]
                     (auto ec, auto size) mutable
@@ -59,12 +54,7 @@ namespace impl
 
             template <typename Handler>
             static std::expected<void, std::error_code>
-            receivePacket(
-                const std::atomic<bool>& isRunning,
-                Socket& socket,
-                Endpoint& remote,
-                std::vector<char>& buffer,
-                Handler&& handler)
+            receivePacket(  const std::atomic<bool>& isRunning, Socket& socket, Endpoint& remote,   std::vector<char>& buffer,  Handler&& handler)
             {
                 while (isRunning)
                 {

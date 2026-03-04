@@ -1,17 +1,14 @@
-#include "TCPClient.h"
+#include "Client.h"
 
-#include <iostream>
-#include <exception>
-
-#include <boost/asio/write.hpp>
-
-void TCPClient::resolveEndPoint()
+template <typename Protocol>
+void Client<Protocol>::resolveEndPoint()
 {
-    auto endpoints = m_resolver.resolve( boost::asio::ip::tcp::v4(),  m_ip, std::to_string(m_port));
+    auto endpoints = m_resolver.resolve( Protocol::version,  m_ip, std::to_string(m_port));
     m_serverEndpoint = *endpoints.begin();
 }
 
-void TCPClient::connect()
+template <typename Protocol>
+void Client<Protocol>::connect()
 {
     try
     {
@@ -24,7 +21,8 @@ void TCPClient::connect()
     }
 }
 
-void TCPClient::disconnect()
+template <typename Protocol>
+void Client<Protocol>::disconnect()
 {
     if (m_socket.is_open())
     {
@@ -34,12 +32,14 @@ void TCPClient::disconnect()
     }
 }
 
-void TCPClient::sendPacket(const std::vector<std::byte>& buffer)
+template <typename Protocol>
+void Client<Protocol>::sendPacket(const std::vector<std::byte>& buffer)
 {
     boost::asio::write(m_socket, boost::asio::buffer(buffer));
 }
 
-void TCPClient::logConnectionSuccess()
+template <typename Protocol>
+void Client<Protocol>::logConnectionSuccess()
 {
     std::cout << "Connected to "
               << m_socket.remote_endpoint().address()
@@ -48,12 +48,11 @@ void TCPClient::logConnectionSuccess()
               << std::endl;
 }
 
-void TCPClient::logConnectionFail(const std::exception& ex)
+template <typename Protocol>
+void Client<Protocol>::logConnectionFail(const std::exception& ex)
 {
     std::cout << "Unable to connect to "
-              << m_ip 
-              << ":" 
-              << m_port
+              << m_ip << ":" << m_port
               << "\nError: " << ex.what()
               << std::endl;
 }

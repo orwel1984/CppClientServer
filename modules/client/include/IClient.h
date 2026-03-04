@@ -1,10 +1,9 @@
 #pragma once
-#include <boost/asio.hpp>
 
-class GenericClient
+class IClient
 {
 public:
-    virtual ~GenericClient() = default;
+    virtual ~IClient() = default;
 
     virtual void connect() = 0;
     virtual void disconnect() = 0;     

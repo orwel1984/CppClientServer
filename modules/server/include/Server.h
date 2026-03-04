@@ -40,7 +40,8 @@ public:
   std::error_code shutdown() override;
 
   // Packet Handling
-  void setPacketHandler(PacketHandler handler) {
+  void setPacketHandler(PacketHandler handler)
+  {
     m_packetHandler = std::move(handler);
   }
 

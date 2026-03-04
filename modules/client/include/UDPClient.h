@@ -1,9 +1,13 @@
 #pragma once
 
 #include <string>
-#include "GenericClient.h"
 
-class UDPClient : public GenericClient
+#include <boost/asio/ip/udp.hpp>
+#include <boost/asio/io_context.hpp>
+
+#include "IClient.h"
+
+class UDPClient : public IClient
 {
 public:
     UDPClient(boost::asio::io_context& io_context, const std::string& ip, uint16_t port)

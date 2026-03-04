@@ -1,11 +1,21 @@
 #pragma once
 
+// Project headers
 #include "server_error.h"
 #include "logging.hpp"
 
-#include <boost/asio.hpp>
+// STL
 #include <string>
+#include <vector>
+#include <optional>
 #include <expected>
+#include <system_error>
+
+// Boost 
+#include <boost/asio/io_context.hpp>
+#include <boost/asio/ip/tcp.hpp>
+#include <boost/asio/buffer.hpp>
+#include <boost/system/error_code.hpp>
 
 namespace impl
 {

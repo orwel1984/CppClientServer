@@ -7,12 +7,18 @@
 
 #include "IClient.h"
 
-class TCPClient : public IClient
+template <typename Protocol>
+class Client : public IClient
 {
+    using Context = typename Protocol::Context;
+    using Resolver = typename Protocol::Resolver;
+    using Socket = typename Protocol::Socket;
+    using Endpoint = typename Protocol::Endpoint;
+    using Error_Code = typename Protocol::error_code;
+
 public:
-    TCPClient(boost::asio::io_context& io_context,
-              const std::string& ip,
-              uint16_t port)
+
+    Client(Context& io_context, const std::string& ip, uint16_t port)
         : m_ip(ip),
           m_port(port),
           m_socket(io_context),
@@ -21,7 +27,7 @@ public:
         resolveEndPoint();
     }
 
-    ~TCPClient() override { cleanup(); }
+    ~Client() override { cleanup(); }
 
     void connect() override;
     void disconnect() override;
@@ -31,16 +37,15 @@ public:
 
 protected:
     void resolveEndPoint();
+
     void logConnectionSuccess();
     void logConnectionFail(const std::exception& ex);
 
 private:
-    using boost_tcp = boost::asio::ip::tcp;
+    Socket m_socket;
+    Resolver m_resolver;
+    Endpoint m_serverEndpoint;
 
-    std::string m_ip;
-    uint16_t m_port;
-
-    boost_tcp::socket m_socket;
-    boost_tcp::resolver m_resolver;
-    boost_tcp::endpoint m_serverEndpoint;
+    std::string m_ip;  // ip address
+    uint16_t m_port;  // port
 };

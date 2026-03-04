@@ -32,8 +32,11 @@ void UDPClient::sendPacket(const std::vector<std::byte>& buffer)
 
 void  UDPClient::logConnetionSuccesss()
 {
-        std::cout << "Connected to " << m_serverEndpoint.address() << ":"
-                  << m_serverEndpoint.port() << std::endl;
+        std::cout << "Connected to " 
+                        << m_serverEndpoint.address() 
+                        << ":"
+                        << m_serverEndpoint.port() 
+                        << std::endl;
 }
 
 void  UDPClient::logConnetionFail(const std::exception &ex)
